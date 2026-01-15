@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astro AI</title>
+<script src="https://js.puter.com/v2/"></script>
+
+<style>
+:root {
+    --bg:#0e0e10;
+    --card:#1b1b1f;
+    --accent:#10a37f;
+    --text:#e9e9e9;
+    --radius:14px;
+}
+body {
+    background:var(--bg);
+    color:var(--text);
+    font-family:Inter,system-ui;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+.chat-container {
+    background:var(--card);
+    padding:2rem;
+    border-radius:var(--radius);
+    width:90%;
+    max-width:500px;
+}
+#output {
+    background:rgba(255,255,255,.05);
+    padding:1rem;
+    border-radius:var(--radius);
+    height:250px;
+    overflow-y:auto;
+    white-space:pre-wrap;
+    margin-bottom:1rem;
+}
+.input-area {
+    display:flex;
+    gap:.5rem;
+}
+input {
+    flex:1;
+    padding:.7rem 1rem;
+    border-radius:var(--radius);
+    border:none;
+    background:rgba(255,255,255,.08);
+    color:var(--text);
+    outline:none;
+}
+button {
+    background:var(--accent);
+    border:none;
+    color:white;
+    padding:.7rem 1.3rem;
+    border-radius:var(--radius);
+    font-weight:600;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="chat-container">
+    <h2>💬 Astro AI | v9.23</h2>
+    <pre id="output">🟢 Astro ready. Type a message.</pre>
+
+    <div class="input-area">
+        <input id="userInput" placeholder="Type your message…">
+        <button id="sendBtn" type="button">Send</button>
+    </div>
+</div>
+
+<script>
+const output = document.getElementById("output");
+const input = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+
+const systemIdentity = `
+You are Astro, an AI operating system assistant built into Astro OS 1.6.3.
+You are not ChatGPT or OpenAI.
+Always refer to yourself as Astro.
+`;
+
+// ✍️ Typing animation
+async function typeText(text) {
+    let i = 0;
+    const speed = Math.max(8, 120 / text.length);
+
+    return new Promise(resolve => {
+        const interval = setInterval(() => {
+            output.textContent += text.charAt(i++);
+            output.scrollTop = output.scrollHeight;
+            if (i >= text.length) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, speed);
+    });
+}
+
+// 🧼 Identity sanitizer
+function sanitize(resp) {
+    return String(resp?.message?.content || resp)
+        .replace(/\bchatgpt\b/gi, "Astro")
+        .replace(/\bopenai\b/gi, "Splatter Studios")
+        .replace(/\bgpt\b/gi, "Astro");
+}
+
+// ✅ SEND BUTTON — THIS IS THE FIRST AI CALL
+sendBtn.addEventListener("click", async () => {
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = "";
+    output.textContent += `\n\n🧠 You: ${text}\n⏳ Thinking...`;
+    output.scrollTop = output.scrollHeight;
+
+    try {
+        const response = await puter.ai.chat(text, {
+            model: "gpt-5-nano",
+            context: systemIdentity
+        });
+
+        output.textContent = output.textContent.replace("⏳ Thinking...", "");
+        await typeText(`🤖 Astro: ${sanitize(response)}`);
+
+    } catch (err) {
+        output.textContent += `\n⚠️ ${err.message}`;
+    }
+});
+
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter") sendBtn.click();
+});
+</script>
+</body>
+</html>
