@@ -2,132 +2,127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Astro AI</title>
     <script src="https://js.puter.com/v2/"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --bg: #131314;
             --text: #e3e3e3;
-            --subtext: #b4b4b4;
             --input-bg: #1e1f20;
+            --sidebar: #28292a;
             --gradient: linear-gradient(70deg, #4285f4, #9b72cb, #d96570);
-            --content-width: 820px;
+            --max-width: 800px;
         }
 
-        body {
+        body.light-mode {
+            --bg: #ffffff;
+            --text: #1f1f1f;
+            --input-bg: #f0f4f9;
+            --sidebar: #f8fafd;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             background: var(--bg);
             color: var(--text);
-            font-family: 'Google Sans', 'Roboto', sans-serif;
-            margin: 0;
+            font-family: 'Google Sans', sans-serif;
+            overflow: hidden; /* Prevents double scrollbars in Google Sites */
+            transition: background 0.3s;
+        }
+
+        /* --- Layout Structure --- */
+        .main-wrapper {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            overflow: hidden;
+            width: 100%;
         }
 
-        /* --- Header --- */
         header {
-            padding: 1rem 1.5rem;
+            padding: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 10;
         }
 
         .logo h2 {
             margin: 0;
-            font-size: 1.3rem;
-            font-weight: 500;
+            font-size: 1.4rem;
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .new-chat-btn {
-            background: #2b2c2f;
-            color: var(--text);
-            border: none;
-            padding: 10px 18px;
-            border-radius: 24px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: opacity 0.2s;
-        }
-
-        .new-chat-btn:hover { opacity: 0.8; }
-
-        /* --- Main Content Area --- */
+        /* --- Chat Scroll Area --- */
         #chat-window {
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center the content column */
-            padding-bottom: 120px; /* Space for the floating input */
+            align-items: center;
+            padding: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: var(--max-width);
         }
 
         .entry {
-            width: 100%;
-            max-width: var(--content-width);
-            padding: 2rem 1.5rem;
-            box-sizing: border-box;
-            animation: fadeIn 0.4s ease;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 0.4s ease forwards;
+            word-wrap: break-word;
         }
 
-        /* User Prompt Style */
         .user-entry {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: var(--text);
-            font-weight: 400;
-            margin-top: 2rem;
+            margin-top: 1rem;
         }
 
-        /* AI Response Style */
         .astro-entry {
-            font-size: 1rem;
-            line-height: 1.7;
-            color: var(--text);
-            white-space: pre-wrap; /* Maintains spacing */
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
+            line-height: 1.7;
+            font-size: 1rem;
         }
 
         .astro-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             background: var(--gradient);
             border-radius: 50%;
             flex-shrink: 0;
-            margin-top: 4px;
         }
 
-        /* --- Floating Input --- */
-        .input-area {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 2rem;
-            background: linear-gradient(transparent, var(--bg) 40%);
+        /* --- Responsive Input Bar --- */
+        .footer-area {
+            width: 100%;
             display: flex;
             justify-content: center;
+            padding: 1rem;
+            background: linear-gradient(transparent, var(--bg) 30%);
         }
 
         .input-container {
             background: var(--input-bg);
             width: 100%;
-            max-width: var(--content-width);
-            border-radius: 32px;
-            padding: 0.6rem 1.5rem;
+            max-width: var(--max-width);
+            border-radius: 28px;
+            padding: 0.4rem 1.2rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         input {
@@ -136,124 +131,167 @@
             border: none;
             color: var(--text);
             padding: 0.8rem 0;
-            font-size: 1.1rem;
+            font-size: 1rem;
             outline: none;
         }
 
-        #sendBtn {
+        .icon-btn {
             background: transparent;
             border: none;
+            color: var(--text);
             cursor: pointer;
-            fill: var(--text);
-            display: flex;
             padding: 8px;
+            display: flex;
+            border-radius: 50%;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .icon-btn:hover { background: rgba(128,128,128,0.1); }
+
+        /* --- Settings Modal --- */
+        #settingsOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center;
+            z-index: 1000; padding: 20px;
         }
 
-        /* Mobile Adjustments */
+        .settings-card {
+            background: var(--sidebar);
+            padding: 2rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center; margin: 1.2rem 0;
+        }
+
+        select {
+            padding: 6px 10px; border-radius: 8px; background: var(--bg); color: var(--text); border: 1px solid #555;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile specific tweaks */
         @media (max-width: 600px) {
             .user-entry { font-size: 1.2rem; }
-            .entry { padding: 1rem; }
+            header { padding: 0.8rem; }
+            .logo h2 { font-size: 1.1rem; }
         }
     </style>
 </head>
-
 <body>
-    <header>
-        <div class="logo"><h2>Astro</h2></div>
-        <button class="new-chat-btn" id="newChatBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            New chat
-        </button>
-    </header>
 
-    <main id="chat-window">
+    <div class="main-wrapper">
+        <header>
+            <div class="logo"><h2>Astro</h2></div>
+            <div style="display: flex; gap: 5px;">
+                <button class="icon-btn" id="newChatBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </button>
+                <button class="icon-btn" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-4.3c.1-.4.1-.8.1-1.2s0-.8-.1-1.2l2.1-1.6c.2-.1.2-.4.1-.6l-2-3.5c-.1-.2-.4-.3-.6-.2l-2.5 1c-.5-.4-1.1-.7-1.7-.9l-.4-2.6c0-.2-.2-.4-.5-.4h-4c-.3 0-.5.2-.5.4l-.4 2.6c-.6.2-1.2.5-1.7.9l-2.5-1c-.2-.1-.5 0-.6.2l-2 3.5c-.1.2-.1.5.1.6l2.1 1.6c-.1.4-.1.8-.1 1.2s0 .8.1 1.2l-2.1 1.6c-.2.1-.2.4-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1c.5.4 1.1.7 1.7.9l.4 2.6c0 .2.2.4.5.4h4c.3 0 .5-.2.5-.4l.4-2.6c.6-.2 1.2-.5 1.7-.9l2.5 1c.2.1.5 0 .6-.2l2-3.5c.1-.2.1-.5-.1-.6l-2.1-1.6z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main id="chat-window">
+            <div class="content-container" id="chat-content">
+                </div>
         </main>
 
-    <div class="input-area">
-        <div class="input-container">
-            <input id="userInput" placeholder="Enter a prompt here" autocomplete="off">
-            <button id="sendBtn">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
+        <div class="footer-area">
+            <div class="input-container">
+                <input id="userInput" placeholder="Message Astro" autocomplete="off">
+                <button class="icon-btn" id="sendBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsOverlay">
+        <div class="settings-card">
+            <h3 style="margin-top:0">Settings</h3>
+            <div class="setting-row">
+                <span>Appearance</span>
+                <select id="themeSelect">
+                    <option value="dark">Dark Mode</option>
+                    <option value="light">Light Mode</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <span>Response style</span>
+                <select id="lengthSelect">
+                    <option value="concise">Concise</option>
+                    <option value="detailed">Detailed</option>
+                </select>
+            </div>
+            <button id="closeSettings" style="width:100%; padding:10px; border-radius:12px; border:none; background:var(--gradient); color:white; font-weight:bold; cursor:pointer; margin-top:1rem;">Save & Exit</button>
         </div>
     </div>
 
 <script>
     const chatWindow = document.getElementById("chat-window");
+    const chatContent = document.getElementById("chat-content");
     const input = document.getElementById("userInput");
     const sendBtn = document.getElementById("sendBtn");
-    const newChatBtn = document.getElementById("newChatBtn");
-
-    const systemIdentity = `You are Astro, a helpful AI assistant. Respond in clear, helpful paragraphs.`;
+    const themeSelect = document.getElementById("themeSelect");
+    const lengthSelect = document.getElementById("lengthSelect");
+    const settingsOverlay = document.getElementById("settingsOverlay");
 
     function initChat() {
-        chatWindow.innerHTML = `
-            <div class="entry user-entry" style="text-align: center; margin-top: 15vh; opacity: 0.5;">
-                How can I help you today?
-            </div>
-        `;
+        chatContent.innerHTML = `<div style="text-align:center; margin-top:20vh; opacity:0.3; font-size:1.5rem;">How can I help you?</div>`;
     }
 
-    function addUserMessage(text) {
-        // Remove welcome text if it exists
-        if (chatWindow.children.length === 1 && chatWindow.innerText.includes("How can I help")) {
-            chatWindow.innerHTML = "";
-        }
+    // Modal Control
+    document.getElementById("settingsBtn").onclick = () => settingsOverlay.style.display = 'flex';
+    document.getElementById("closeSettings").onclick = () => settingsOverlay.style.display = 'none';
 
-        const div = document.createElement("div");
-        div.className = "entry user-entry";
-        div.textContent = text;
-        chatWindow.appendChild(div);
-    }
-
-    function addAstroMessage() {
-        const div = document.createElement("div");
-        div.className = "entry astro-entry";
-        div.innerHTML = `
-            <div class="astro-icon"></div>
-            <div class="response-text">...</div>
-        `;
-        chatWindow.appendChild(div);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-        return div.querySelector(".response-text");
-    }
-
-    function sanitize(resp) {
-        return String(resp?.message?.content || resp)
-            .replace(/\bchatgpt\b/gi, "Astro")
-            .replace(/\bopenai\b/gi, "Splatter Studios")
-            .replace(/\bgpt\b/gi, "Astro");
-    }
+    // Theme Switcher
+    themeSelect.addEventListener('change', (e) => {
+        document.body.className = e.target.value === 'light' ? 'light-mode' : '';
+    });
 
     async function handleSend() {
         const text = input.value.trim();
         if (!text) return;
-
+        
+        if (chatContent.innerText.includes("How can I help")) chatContent.innerHTML = "";
         input.value = "";
-        addUserMessage(text);
-        const responseElement = addAstroMessage();
+
+        // User Message
+        const uEntry = document.createElement("div");
+        uEntry.className = "entry user-entry";
+        uEntry.textContent = text;
+        chatContent.appendChild(uEntry);
+
+        // Astro Placeholder
+        const aEntry = document.createElement("div");
+        aEntry.className = "entry astro-entry";
+        aEntry.innerHTML = `<div class="astro-icon"></div><div class="res-text">...</div>`;
+        chatContent.appendChild(aEntry);
+        const resBox = aEntry.querySelector(".res-text");
+
+        chatWindow.scrollTo(0, chatWindow.scrollHeight);
 
         try {
+            const lengthMod = lengthSelect.value === 'concise' ? "Be brief." : "Be very descriptive.";
             const response = await puter.ai.chat(text, {
                 model: "gpt-4o",
-                context: systemIdentity
+                context: `You are Astro. ${lengthMod}`
             });
-            responseElement.textContent = sanitize(response);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        } catch (err) {
-            responseElement.textContent = "Sorry, I encountered an error: " + err.message;
+            resBox.textContent = String(response?.message?.content || response);
+        } catch (e) {
+            resBox.textContent = "Error: " + e.message;
         }
+        chatWindow.scrollTo(0, chatWindow.scrollHeight);
     }
 
-    sendBtn.addEventListener("click", handleSend);
-    input.addEventListener("keydown", e => { if (e.key === "Enter") handleSend(); });
-    newChatBtn.addEventListener("click", initChat);
+    sendBtn.onclick = handleSend;
+    input.onkeydown = (e) => { if(e.key === 'Enter') handleSend(); };
+    document.getElementById("newChatBtn").onclick = initChat;
 
     initChat();
 </script>
