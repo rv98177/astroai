@@ -1,143 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Astro AI</title>
-<script src="https://js.puter.com/v2/"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro AI</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
 
-<style>
-:root {
-    --bg:#0e0e10;
-    --card:#1b1b1f;
-    --accent:#10a37f;
-    --text:#e9e9e9;
-    --radius:14px;
-}
-body {
-    background:var(--bg);
-    color:var(--text);
-    font-family:Inter,system-ui;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-.chat-container {
-    background:var(--card);
-    padding:2rem;
-    border-radius:var(--radius);
-    width:90%;
-    max-width:500px;
-}
-#output {
-    background:rgba(255,255,255,.05);
-    padding:1rem;
-    border-radius:var(--radius);
-    height:250px;
-    overflow-y:auto;
-    white-space:pre-wrap;
-    margin-bottom:1rem;
-}
-.input-area {
-    display:flex;
-    gap:.5rem;
-}
-input {
-    flex:1;
-    padding:.7rem 1rem;
-    border-radius:var(--radius);
-    border:none;
-    background:rgba(255,255,255,.08);
-    color:var(--text);
-    outline:none;
-}
-button {
-    background:var(--accent);
-    border:none;
-    color:white;
-    padding:.7rem 1.3rem;
-    border-radius:var(--radius);
-    font-weight:600;
-    cursor:pointer;
-}
-</style>
+    <style>
+        :root {
+            --bg: #131314;
+            --text: #e3e3e3;
+            --subtext: #b4b4b4;
+            --input-bg: #1e1f20;
+            --accent: #4285f4;
+            --gradient: linear-gradient(70deg, #4285f4, #9b72cb, #d96570);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Google Sans', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 500;
+        }
+
+        /* --- Chat Area --- */
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-msg { justify-content: flex-end; }
+
+        .bubble {
+            max-width: 80%;
+            padding: 0.8rem 1.2rem;
+            line-height: 1.6;
+            border-radius: 18px;
+        }
+
+        .user-bubble {
+            background: #2b2c2f;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .astro-bubble {
+            color: var(--text);
+            background: transparent;
+        }
+
+        /* --- Input Area --- */
+        .input-wrapper {
+            padding: 1rem 2rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .input-container {
+            background: var(--input-bg);
+            border-radius: 30px;
+            padding: 0.5rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .input-container:focus-within {
+            box-shadow: 0 0 0 1px #555;
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            padding: 1rem 0;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: rgba(255,255,255,0.1); }
+
+        svg { fill: var(--text); width: 24px; height: 24px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 
 <body>
-<div class="chat-container">
-    <h2>💬 Astro AI | v9.23</h2>
-    <pre id="output">🟢 Astro ready. Type a message.</pre>
+    <header>
+        <h2>Astro AI</h2>
+    </header>
 
-    <div class="input-area">
-        <input id="userInput" placeholder="Type your message…">
-        <button id="sendBtn" type="button">Send</button>
+    <div id="chat-window">
+        <div class="message">
+            <div class="bubble astro-bubble">Hello! I'm Astro. How can I help you today?</div>
+        </div>
     </div>
-</div>
+
+    <div class="input-wrapper">
+        <div class="input-container">
+            <input id="userInput" placeholder="Enter a prompt here">
+            <button id="sendBtn">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
 
 <script>
-const output = document.getElementById("output");
-const input = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
+    const chatWindow = document.getElementById("chat-window");
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
 
-const systemIdentity = `
-You are Astro, an AI operating system assistant built into Astro OS 1.6.3.
-You are not ChatGPT or OpenAI.
-Always refer to yourself as Astro.
-`;
+    const systemIdentity = `You are Astro, an AI assistant. You are helpful and concise.`;
 
-// ✍️ Typing animation
-async function typeText(text) {
-    let i = 0;
-    const speed = Math.max(8, 120 / text.length);
-
-    return new Promise(resolve => {
-        const interval = setInterval(() => {
-            output.textContent += text.charAt(i++);
-            output.scrollTop = output.scrollHeight;
-            if (i >= text.length) {
-                clearInterval(interval);
-                resolve();
-            }
-        }, speed);
-    });
-}
-
-// 🧼 Identity sanitizer
-function sanitize(resp) {
-    return String(resp?.message?.content || resp)
-        .replace(/\bchatgpt\b/gi, "Astro")
-        .replace(/\bopenai\b/gi, "Splatter Studios")
-        .replace(/\bgpt\b/gi, "Astro");
-}
-
-// ✅ SEND BUTTON — THIS IS THE FIRST AI CALL
-sendBtn.addEventListener("click", async () => {
-    const text = input.value.trim();
-    if (!text) return;
-
-    input.value = "";
-    output.textContent += `\n\n🧠 You: ${text}\n⏳ Thinking...`;
-    output.scrollTop = output.scrollHeight;
-
-    try {
-        const response = await puter.ai.chat(text, {
-            model: "gpt-5-nano",
-            context: systemIdentity
-        });
-
-        output.textContent = output.textContent.replace("⏳ Thinking...", "");
-        await typeText(`🤖 Astro: ${sanitize(response)}`);
-
-    } catch (err) {
-        output.textContent += `\n⚠️ ${err.message}`;
+    function createMessage(text, isUser = false) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `message ${isUser ? 'user-msg' : ''}`;
+        
+        const bubble = document.createElement("div");
+        bubble.className = `bubble ${isUser ? 'user-bubble' : 'astro-bubble'}`;
+        bubble.textContent = text;
+        
+        msgDiv.appendChild(bubble);
+        chatWindow.appendChild(msgDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        return bubble;
     }
-});
 
-input.addEventListener("keydown", e => {
-    if (e.key === "Enter") sendBtn.click();
-});
+    // 🧼 Identity sanitizer
+    function sanitize(resp) {
+        return String(resp?.message?.content || resp)
+            .replace(/\bchatgpt\b/gi, "Astro")
+            .replace(/\bopenai\b/gi, "Splatter Studios")
+            .replace(/\bgpt\b/gi, "Astro");
+    }
+
+    sendBtn.addEventListener("click", async () => {
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = "";
+        createMessage(text, true);
+
+        // Show thinking state
+        const botBubble = createMessage("...");
+
+        try {
+            const response = await puter.ai.chat(text, {
+                model: "gpt-4o", // Changed to a more standard Puter model string
+                context: systemIdentity
+            });
+
+            botBubble.textContent = sanitize(response);
+        } catch (err) {
+            botBubble.textContent = "Error: " + err.message;
+        }
+    });
+
+    input.addEventListener("keydown", e => { if (e.key === "Enter") sendBtn.click(); });
 </script>
 </body>
 </html>
