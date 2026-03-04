@@ -34,11 +34,10 @@
             background: var(--bg);
             color: var(--text);
             font-family: 'Google Sans', sans-serif;
-            overflow: hidden; /* Prevents double scrollbars in Google Sites */
+            overflow: hidden; 
             transition: background 0.3s;
         }
 
-        /* --- Layout Structure --- */
         .main-wrapper {
             display: flex;
             flex-direction: column;
@@ -62,7 +61,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- Chat Scroll Area --- */
         #chat-window {
             flex: 1;
             overflow-y: auto;
@@ -105,7 +103,6 @@
             flex-shrink: 0;
         }
 
-        /* --- Responsive Input Bar --- */
         .footer-area {
             width: 100%;
             display: flex;
@@ -147,7 +144,6 @@
 
         .icon-btn:hover { background: rgba(128,128,128,0.1); }
 
-        /* --- Settings Modal --- */
         #settingsOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center;
@@ -173,7 +169,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Mobile specific tweaks */
         @media (max-width: 600px) {
             .user-entry { font-size: 1.2rem; }
             header { padding: 0.8rem; }
@@ -187,113 +182,7 @@
         <header>
             <div class="logo"><h2>Astro</h2></div>
             <div style="display: flex; gap: 5px;">
-                <button class="icon-btn" id="newChatBtn">
+                <button class="icon-btn" id="newChatBtn" title="New Chat">
                     <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 </button>
-                <button class="icon-btn" id="settingsBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7-4.3c.1-.4.1-.8.1-1.2s0-.8-.1-1.2l2.1-1.6c.2-.1.2-.4.1-.6l-2-3.5c-.1-.2-.4-.3-.6-.2l-2.5 1c-.5-.4-1.1-.7-1.7-.9l-.4-2.6c0-.2-.2-.4-.5-.4h-4c-.3 0-.5.2-.5.4l-.4 2.6c-.6.2-1.2.5-1.7.9l-2.5-1c-.2-.1-.5 0-.6.2l-2 3.5c-.1.2-.1.5.1.6l2.1 1.6c-.1.4-.1.8-.1 1.2s0 .8.1 1.2l-2.1 1.6c-.2.1-.2.4-.1.6l2 3.5c.1.2.4.3.6.2l2.5-1c.5.4 1.1.7 1.7.9l.4 2.6c0 .2.2.4.5.4h4c.3 0 .5-.2.5-.4l.4-2.6c.6-.2 1.2-.5 1.7-.9l2.5 1c.2.1.5 0 .6-.2l2-3.5c.1-.2.1-.5-.1-.6l-2.1-1.6z"/></svg>
-                </button>
-            </div>
-        </header>
-
-        <main id="chat-window">
-            <div class="content-container" id="chat-content">
-                </div>
-        </main>
-
-        <div class="footer-area">
-            <div class="input-container">
-                <input id="userInput" placeholder="Message Astro" autocomplete="off">
-                <button class="icon-btn" id="sendBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="settingsOverlay">
-        <div class="settings-card">
-            <h3 style="margin-top:0">Settings</h3>
-            <div class="setting-row">
-                <span>Appearance</span>
-                <select id="themeSelect">
-                    <option value="dark">Dark Mode</option>
-                    <option value="light">Light Mode</option>
-                </select>
-            </div>
-            <div class="setting-row">
-                <span>Response style</span>
-                <select id="lengthSelect">
-                    <option value="concise">Concise</option>
-                    <option value="detailed">Detailed</option>
-                </select>
-            </div>
-            <button id="closeSettings" style="width:100%; padding:10px; border-radius:12px; border:none; background:var(--gradient); color:white; font-weight:bold; cursor:pointer; margin-top:1rem;">Save & Exit</button>
-        </div>
-    </div>
-
-<script>
-    const chatWindow = document.getElementById("chat-window");
-    const chatContent = document.getElementById("chat-content");
-    const input = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const themeSelect = document.getElementById("themeSelect");
-    const lengthSelect = document.getElementById("lengthSelect");
-    const settingsOverlay = document.getElementById("settingsOverlay");
-
-    function initChat() {
-        chatContent.innerHTML = `<div style="text-align:center; margin-top:20vh; opacity:0.3; font-size:1.5rem;">How can I help you?</div>`;
-    }
-
-    // Modal Control
-    document.getElementById("settingsBtn").onclick = () => settingsOverlay.style.display = 'flex';
-    document.getElementById("closeSettings").onclick = () => settingsOverlay.style.display = 'none';
-
-    // Theme Switcher
-    themeSelect.addEventListener('change', (e) => {
-        document.body.className = e.target.value === 'light' ? 'light-mode' : '';
-    });
-
-    async function handleSend() {
-        const text = input.value.trim();
-        if (!text) return;
-        
-        if (chatContent.innerText.includes("How can I help")) chatContent.innerHTML = "";
-        input.value = "";
-
-        // User Message
-        const uEntry = document.createElement("div");
-        uEntry.className = "entry user-entry";
-        uEntry.textContent = text;
-        chatContent.appendChild(uEntry);
-
-        // Astro Placeholder
-        const aEntry = document.createElement("div");
-        aEntry.className = "entry astro-entry";
-        aEntry.innerHTML = `<div class="astro-icon"></div><div class="res-text">...</div>`;
-        chatContent.appendChild(aEntry);
-        const resBox = aEntry.querySelector(".res-text");
-
-        chatWindow.scrollTo(0, chatWindow.scrollHeight);
-
-        try {
-            const lengthMod = lengthSelect.value === 'concise' ? "Be brief." : "Be very descriptive.";
-            const response = await puter.ai.chat(text, {
-                model: "gpt-4o",
-                context: `You are Astro. ${lengthMod}`
-            });
-            resBox.textContent = String(response?.message?.content || response);
-        } catch (e) {
-            resBox.textContent = "Error: " + e.message;
-        }
-        chatWindow.scrollTo(0, chatWindow.scrollHeight);
-    }
-
-    sendBtn.onclick = handleSend;
-    input.onkeydown = (e) => { if(e.key === 'Enter') handleSend(); };
-    document.getElementById("newChatBtn").onclick = initChat;
-
-    initChat();
-</script>
-</body>
-</html>
+                <button class="icon-btn" id="settingsBtn" title="
